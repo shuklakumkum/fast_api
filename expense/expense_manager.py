@@ -7,8 +7,8 @@ from validator import (
 from file_handler import save_expense
 from datetime import datetime
 
+# ADD NEW EXPENSE
 
-# Add a new expense
 def add_expense(expense):
     amount = validate_amount()
     if amount is None:
@@ -36,19 +36,48 @@ def add_expense(expense):
     save_expense(expense)
     print("Expense added successfully!")
 
+# View all expense
 
-# Display all expenses
 def view_all_expense(expense):
     if not expense:
         print("No expenses found.")
         return
 
-    print("\n=== All Expenses ===")
+    print("All Expenses")
     for i, exp in enumerate(expense, start=1):
-        print(f"{i}. {exp['date']} | {exp['category']} | {exp['amount']} | {exp['description']}")
+        print(
+            f"{i}. {exp['date']} | {exp['category']} | "
+            f"{exp['amount']} | {exp['description']}"
+        )
 
+# View expense by category
 
-# Edit an existing expense
+def view_by_category(expense):
+    if not expense:
+        print("No expenses available.")
+        return
+
+    category = input("Enter category name: ").strip().lower()
+    if not category:
+        print("Category cannot be empty.")
+        return
+
+    print(f" Expenses in Category: {category} ===")
+    found = False
+
+    for i, exp in enumerate(expense, start=1):
+        if exp["category"].lower() == category:
+            print(
+                f"{i}. {exp['date']} | {exp['category']} | "
+                f"{exp['amount']} | {exp['description']}"
+            )
+            found = True
+
+    if not found:
+        print("No expenses found for this category.")
+
+# Edit expense
+
 def edit_expense(expense):
     if not expense:
         print("No expenses to edit.")
@@ -67,37 +96,35 @@ def edit_expense(expense):
 
     exp = expense[index]
 
-    # Update if user enter new values
-    new_amt = input(f"Amount ({exp['amount']}): ").strip()
-    if new_amt:
-        try:
-            val = float(new_amt)
-            if val > 0:
-                exp["amount"] = val
-        except:
-            print("Invalid amount.")
+    print("Press Enter to keep existing value")
 
-    new_cat = input(f"Category ({exp['category']}): ").strip()
-    if new_cat:
-        exp["category"] = new_cat
+    choice = input(f"Change amount? (current: {exp['amount']}) (y/n): ").lower()
+    if choice == "y":
+        new_amount = validate_amount()
+        if new_amount is not None:
+            exp["amount"] = new_amount
+
+    choice = input(f"Change category? (current: {exp['category']}) (y/n): ").lower()
+    if choice == "y":
+        new_category = validate_category()
+        if new_category is not None:
+            exp["category"] = new_category
 
     new_desc = input(f"Description ({exp['description']}): ").strip()
     if new_desc:
         exp["description"] = new_desc
 
-    new_date = input(f"Date ({exp['date']}): ").strip()
-    if new_date:
-        try:
-            datetime.strptime(new_date, "%d-%m-%Y")
+    choice = input(f"Change date? (current: {exp['date']}) (y/n): ").lower()
+    if choice == "y":
+        new_date = validate_date()
+        if new_date is not None:
             exp["date"] = new_date
-        except:
-            print("Invalid date.")
 
     save_expense(expense)
     print("Expense updated successfully!")
 
-
 # Delete expense
+
 def delete_expense(expense):
     if not expense:
         print("No expenses to delete.")
@@ -118,28 +145,33 @@ def delete_expense(expense):
     if confirm == "yes":
         expense.pop(index)
         save_expense(expense)
-        print("Expense deleted.")
+        print("Expense deleted successfully.")
     else:
         print("Delete cancelled.")
 
+# Monthly summary
 
-# Monthly summary 
 def monthly_summary(expense):
     if not expense:
         print("No expenses available.")
         return
 
-    monthly = {}
-    category = {}
+    monthly_total = {}
+    category_total = {}
 
     for exp in expense:
-        month = exp["date"][3:]
-        monthly[month] = monthly.get(month, 0) + exp["amount"]
-        category[exp["category"]] = category.get(exp["category"], 0) + exp["amount"]
+        month = exp["date"][3:]  # mm-yyyy
+        monthly_total[month] = monthly_total.get(month, 0) + exp["amount"]
+        category_total[exp["category"]] = (
+            category_total.get(exp["category"], 0) + exp["amount"]
+        )
 
-    print("Monthly Summary")
-    for m, t in monthly.items():
-        print(f"{m}: {t}")
+    print("\n=== Monthly Summary ===")
+    for month, total in monthly_total.items():
+        print(f"{month}: {total}")
 
-    top = max(category, key=category.get)
-    print(f"Highest Spending Category: {top} -> {category[top]}")
+    highest = max(category_total, key=category_total.get)
+    print(
+        f"Highest Spending Category: {highest} -> "
+        f"{category_total[highest]}"
+    )

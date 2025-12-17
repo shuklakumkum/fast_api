@@ -15,7 +15,7 @@ def validate_amount():
             if amount > 0:
                 return amount
             print("Amount must be greater than 0.")
-        except:
+        except ValueError:
             print("Invalid number.")
 
 
@@ -67,5 +67,5 @@ def validate_date():
         try:
             datetime.strptime(date_in, "%d-%m-%Y")
             return date_in
-        except:
+        except ValueError:
             print("Invalid date format.")

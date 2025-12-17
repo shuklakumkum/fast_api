@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-FILENAME = "expence.json"
+FILENAME = "expense.json"
 
 
 # Load Expense
@@ -32,7 +32,7 @@ def validate_amount():
             if amount > 0:
                 return amount
             print("Amount must be greater than 0.")
-        except:
+        except ValueError:
             print("Invalid number.")
 
 
@@ -73,11 +73,9 @@ def validate_date():
         try:
             datetime.strptime(date_in, "%d-%m-%Y")
             return date_in
-        except:
+        except ValueError:
             print("Invalid date format.")
 
-
-# Expense Manager Function
 
 # Add Expense
 def add_expense(expense):
@@ -163,7 +161,7 @@ def edit_expense(expense):
             val = float(new_amt)
             if val > 0:
                 exp["amount"] = val
-        except:
+        except ValueError:
             print("Invalid amount.")
 
     new_cat = input(f"Category ({exp['category']}): ").strip()
@@ -179,7 +177,7 @@ def edit_expense(expense):
         try:
             datetime.strptime(new_date, "%d-%m-%Y")
             exp["date"] = new_date
-        except:
+        except ValueError:
             print("Invalid date.")
 
     save_expense(expense)
