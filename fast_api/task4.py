@@ -1,20 +1,21 @@
-#import statement
+#import library
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
+from typing import List
 
-# To create FastAPI app
-task = FastAPI()
+# Create fastapi app
+task = FastAPI(title="User CRUD API")
 
-# Pydantic model
+# user model
 class User(BaseModel):
     name: str
     age: int
     email: str
 
-# Fake database
-users = []
+# fake database
+users: List[User] = []
 
-# ---------------- CREATE ----------------
+# create user
 @task.post("/users", status_code=status.HTTP_201_CREATED)
 def create_user(user: User):
     users.append(user)
@@ -23,12 +24,13 @@ def create_user(user: User):
         "user_id": len(users) - 1
     }
 
-# ---------------- READ ----------------
-@task.get("/users")
+# read all user
+@task.get("/users", response_model=List[User], status_code=status.HTTP_200_OK)
 def get_all_users():
     return users
 
-@task.get("/users/{user_id}")
+# read single user
+@task.get("/users/{user_id}", response_model=User, status_code=status.HTTP_200_OK)
 def get_user(user_id: int):
     if user_id < 0 or user_id >= len(users):
         raise HTTPException(
@@ -37,8 +39,8 @@ def get_user(user_id: int):
         )
     return users[user_id]
 
-# ---------------- UPDATE ----------------
-@task.put("/users/{user_id}", status_code=status.HTTP_200_OK)
+# update user
+@task.put("/users/{user_id}", response_model=User, status_code=status.HTTP_200_OK)
 def update_user(user_id: int, user: User):
     if user_id < 0 or user_id >= len(users):
         raise HTTPException(
@@ -47,12 +49,9 @@ def update_user(user_id: int, user: User):
         )
 
     users[user_id] = user
-    return {
-        "message": "User updated successfully",
-        "user": user
-    }
+    return user
 
-# ---------------- DELETE ----------------
+# delete user
 @task.delete("/users/{user_id}", status_code=status.HTTP_200_OK)
 def delete_user(user_id: int):
     if user_id < 0 or user_id >= len(users):
@@ -66,3 +65,8 @@ def delete_user(user_id: int):
         "message": "User deleted successfully",
         "deleted_user": deleted_user
     }
+
+# root endpoint
+@task.get("/")
+def root():
+    return {"message": "FastAPI CRUD is working"}
